@@ -10,7 +10,7 @@
     "id": "skale",
     "type": "scale",
     "capabilities": ["battery", "tare", "timerControl", "displayControl"],
-    "ble": {"match": {"serviceUuids": ["0000ff08-0000-1000-8000-00805f9b34fb"]}},
+    "ble": {"match": {"name": {"prefix": "Skale"}}},
     "surfaces": [{"id": "settings", "role": "settings", "endpoint": "device-settings"}]
   }],
   "settings": {},

@@ -5,6 +5,25 @@ runtime-v2 plugin API. The host bundle contains `manifest.json` and
 root-level `plugin.js`. Use the ZIP produced by `npm run package` for
 installation.
 
+## Skale name-discovery test
+
+This test branch is based on upstream v0.2.0 and changes only the runtime
+manifest's BLE discovery matcher. It matches names beginning with `Skale`
+(case-insensitive), including when service UUIDs are unavailable in advertising.
+The unchanged driver still requires the Skale service after connecting.
+
+Install through Decaid **Plugins -> + -> GitHub Branch**:
+
+```text
+Repository: pponce/decaid-skale-plugin
+Branch:     test/skale-name-discovery
+```
+
+The plugin keeps id `skale.reaplugin` and version `0.2.0` for this isolated
+test. After reconnecting, `GET /api/v1/devices` should show the scale id beginning
+with `plugin:skale.reaplugin:skale:`. Then test weight readings, on-screen tare,
+and the physical circle-button tare. Hardware success remains to be confirmed.
+
 ## Installation
 
 This plugin requires a Decaid build containing the runtime-v2 plugin contract:

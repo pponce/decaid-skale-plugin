@@ -96,6 +96,37 @@ Future<Map<String, dynamic>> _request(
 }
 
 void main() {
+  test('Skale discovery works without advertised service UUIDs and excludes DE1', () {
+    final root = Platform.environment['SKALE_PLUGIN_ROOT'] ?? '.';
+    final manifest = PluginManifest.fromJson(
+      jsonDecode(File('$root/manifest.json').readAsStringSync())
+          as Map<String, dynamic>,
+    );
+    final matcher = manifest.drivers.single.ble!;
+    for (final name in ['Skale2', 'skale', 'SKALE-2']) {
+      expect(
+        matcher.evaluate(
+          name: name,
+          nameComplete: true,
+          serviceUuids: null,
+          servicesComplete: false,
+        ),
+        PluginBleMatch.match,
+        reason: 'A named Skale must not wait for an advertised UUID',
+      );
+    }
+    expect(
+      matcher.evaluate(
+        name: 'DE1',
+        nameComplete: true,
+        serviceUuids: null,
+        servicesComplete: false,
+      ),
+      PluginBleMatch.noMatch,
+      reason: 'Skale discovery must not leave the DE1 pending',
+    );
+  });
+
   test('published Skale package connects through the real host BLE bridge', () async {
     final root = Platform.environment['SKALE_PLUGIN_ROOT'] ?? '.';
     final manifest = PluginManifest.fromJson(
@@ -115,7 +146,8 @@ void main() {
     );
 
     final transports = <_SkaleTransport>[];
-    final evidence = BleAdvertisementEvidence(serviceUuids: const [_service]);
+    final evidence = BleAdvertisementEvidence(name: 'Skale2', nameComplete: true, serviceUuids: null, servicesComplete: false);
+    expect(manager.bleService.registry.decide(evidence).kind, PluginBleOwnership.plugin);
     Future<Scale> candidate(String id) async => await manager.bleService
           .createCandidate(
             driver: manager.bleService.registry.decide(evidence).drivers.single,
@@ -303,7 +335,7 @@ void main() {
       settings: const {},
       jsCode: File('$root/plugin.js').readAsStringSync(),
     );
-    final evidence = BleAdvertisementEvidence(serviceUuids: const [_service]);
+    final evidence = BleAdvertisementEvidence(name: 'Skale2', nameComplete: true, serviceUuids: null, servicesComplete: false);
     late _SkaleTransport transport;
     final scale = await manager.bleService.createCandidate(
       driver: manager.bleService.registry.decide(evidence).drivers.single,
